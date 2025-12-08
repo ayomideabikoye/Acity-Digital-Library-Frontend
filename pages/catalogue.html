@@ -9,30 +9,33 @@
 <body onload="checkAuthAndRedirect(); window.fetchBooks();"> 
     <div class="catalogue-container">
         
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <header class="app-header">
             <h2><span class="icon">📚</span> Book Catalogue</h2>
-            <div>
-                <button onclick="window.location.href='password.html'" style="background-color: #6c757d; width: auto; margin-right: 10px;">Change Password</button>
-                <button onclick="window.logout()" style="background-color: var(--error-color); width: auto;">Logout</button>
+            <div class="header-actions">
+                <button onclick="window.location.href='mybooks.html'" class="btn-secondary">My Borrowed Books</button>
+                <button onclick="window.location.href='password.html'" class="btn-secondary">Change Password</button>
+                <button onclick="window.logout()" class="btn-danger">Logout</button>
             </div>
         </header>
 
-        <div id="message-catalogue" style="margin-bottom: 20px;"></div>
+        <div id="message-catalogue"></div>
 
-        <div id="admin-panel" style="display:none; border: 1px dashed #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
-            <h4 style="color: var(--primary-color);">Admin Panel: Add Book</h4>
-            <form id="addBookForm" onsubmit="window.handleAddBook(event)">
+        <div id="admin-panel" class="admin-panel">
+            <h4><span class="icon">⚡</span> Admin Panel: Add Book</h4>
+            <form id="addBookForm" onsubmit="window.handleAddBook(event)" class="admin-form">
                 <input type="text" id="title" name="title" placeholder="Title" required>
                 <input type="text" id="author" name="author" placeholder="Author" required>
-                <input type="number" id="copies" name="copies" placeholder="Total Copies" required style="width: 30%; margin-right: 2%;">
-                <input type="text" id="isbn" name="isbn" placeholder="ISBN" required style="width: 68%;">
-                <button type="submit" style="background-color: var(--success-color);">Add New Book</button>
+                <div class="form-row">
+                    <input type="number" id="copies" name="copies" placeholder="Copies" required>
+                    <input type="text" id="isbn" name="isbn" placeholder="ISBN" required>
+                </div>
+                <button type="submit" class="btn-primary">Add New Book</button>
             </form>
             <div id="message-admin"></div>
         </div>
         
-        <h3>Available Books:</h3>
-        <div id="bookList"></div>
+        <h3 class="section-title">Available Books</h3>
+        <div id="bookList" class="book-grid"></div>
     </div>
 
     <script src="../app.js"></script>

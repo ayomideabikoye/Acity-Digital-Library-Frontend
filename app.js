@@ -1,7 +1,8 @@
 const BASE_URL = 'https://acity-digital-library-management-api.onrender.com';
 
 let currentToken = localStorage.getItem('userToken');
-let currenUserRole = localStorage.getItem('userRole');
+let currentUserRole = localStorage.getItem('userRole');
+let dueTimerInterval; 
 
 function loadUserState(){
     currentToken = localStorage.getItem('userToken');
@@ -37,8 +38,6 @@ function checkAuthAndRedirect() {
     }
 }
 
-
-
 async function fetchAPI(endpoint, method, data = null) {
     const url = `${BASE_URL}${endpoint}`;
     const headers = { 'Content-Type': 'application/json' };
@@ -61,6 +60,54 @@ async function fetchAPI(endpoint, method, data = null) {
     return result;
 }
 
+// TIMER LOGIC 
+
+function formatTimeRemaining(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const days = Math.floor(totalSeconds / (3600 * 24));
+    const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    let parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0 && days === 0) parts.push(`${minutes}m`);
+    if (seconds > 0 && days === 0 && hours === 0 && minutes === 0) parts.push(`${seconds}s`);
+
+    if (parts.length === 0) {
+        return totalSeconds >= 0 ? 'Less than 1s' : 'Due Date Passed'; 
+    }
+    return parts.join(' ');
+}
+
+function updateDueTimers() {
+    const timers = document.querySelectorAll('[data-due-date]');
+    const now = Date.now();
+    let timersFound = false;
+
+    timers.forEach(timerEl => {
+        timersFound = true;
+        const dueDate = new Date(timerEl.dataset.dueDate).getTime();
+        const timeRemaining = dueDate - now;
+
+        if (timeRemaining > 0) {
+            timerEl.textContent = formatTimeRemaining(timeRemaining) + ' remaining';
+            timerEl.style.color = 'var(--success-color)';
+        } else {
+            timerEl.textContent = 'Due Date Passed!';
+            timerEl.style.color = 'var(--error-color)';
+            timerEl.style.fontWeight = 'bold';
+        }
+    });
+
+    if (!timersFound && dueTimerInterval) {
+        clearInterval(dueTimerInterval);
+        dueTimerInterval = null;
+    }
+}
+
+
 // Logic for index.html (Login)
 window.handleLogin = async (event) => {
     event.preventDefault();
@@ -74,7 +121,6 @@ window.handleLogin = async (event) => {
         localStorage.setItem('userToken', result.token);
         localStorage.setItem('userRole', result.role);
         
-        // Success: Redirect to the catalogue page
         window.location.href = 'catalogue.html'; 
     } catch (error) {
         displayMessage('message-login', `Error: ${error.message}`, 'error');
@@ -100,6 +146,12 @@ window.handleRegister = async (event) => {
 
 // Logic for catalogue.html (Book Management & Display)
 window.fetchBooks = async () => {
+    loadUserState(); 
+    if (dueTimerInterval) {
+        clearInterval(dueTimerInterval);
+        dueTimerInterval = null;
+    }
+    
     const listElement = document.getElementById('bookList');
     if (!listElement) return;
     listElement.innerHTML = 'Fetching books from API...';
@@ -164,36 +216,119 @@ window.handleDeleteBook = async (bookId) => {
     }
 };
 
+// Logic for borrowing a book (updated message)
 window.handleBorrow = async (bookId) => {
     try {
         await fetchAPI('/api/transactions/borrow', 'POST', { bookId });
-        displayMessage('message-catalogue', `Book borrowed successfully!`, 'success');
+        displayMessage('message-catalogue', `Book borrowed successfully! It is due in 15 days.`, 'success');
         window.fetchBooks(); 
     } catch (error) {
         displayMessage('message-catalogue', `Borrow failed: ${error.message}`, 'error');
     }
 };
 
-// Logic for password.html (Changin Password)
-window.handleChangePassword = async (event) => {
-    event.preventDefault();
-    const newPassword = document.getElementById('new-password').value;
-    displayMessage('message-password', 'Updating password...', '');
+// TRANSACTIONS LOGIC
+
+// Logic for returning a book
+window.handleReturn = async (transactionId) => {
+    if (!confirm("Are you sure you want to return this book?")) return;
     
-    // Placeholder logic for backend route
-    if (newPassword.length < 6) {
-        return displayMessage('message-password', 'Password must be at least 6 characters.', 'error');
+    displayMessage('message-borrowed', 'Processing return...', '');
+
+    try {
+        await fetchAPI(`/api/transactions/return/${transactionId}`, 'PUT');
+        
+        displayMessage('message-borrowed', `Book successfully returned!`, 'success');
+        
+        if (document.getElementById('borrowedList')) {
+            window.fetchBorrowedBooks(); 
+        } 
+    } catch (error) {
+        displayMessage('message-borrowed', `Return failed: ${error.message}`, 'error');
+    }
+};
+
+// Logic for fetching user's borrowed books with timer integration
+window.fetchBorrowedBooks = async () => {
+    loadUserState();
+    const listElement = document.getElementById('borrowedList');
+    if (!listElement) return;
+    listElement.innerHTML = 'Fetching your borrowed books...';
+
+    if (dueTimerInterval) {
+        clearInterval(dueTimerInterval);
     }
 
     try {
-        const result = await fetchAPI('/api/auth/password', 'PUT', { newPassword });
+        const transactions = await fetchAPI('/api/transactions/my-books', 'GET');
         
-        displayMessage('message-password', 'Password change simulation successful! Please log in again.', 'success');
+        if (transactions.length === 0) {
+            listElement.innerHTML = '<p>You currently have no borrowed books.</p>';
+            return;
+        }
+
+        listElement.innerHTML = transactions.map(transaction => {
+            const dueDate = new Date(transaction.due_date);
+            
+            return `
+                <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${transaction.book_title}</strong> by ${transaction.book_author || 'Unknown Author'}<br>
+                        Borrowed: ${new Date(transaction.borrow_date).toLocaleDateString()}
+                    </div>
+                    <div style="text-align: right;">
+                        Due in:<br>
+                        <span id="timer-${transaction.borrow_id}" data-due-date="${dueDate.toISOString()}">Loading timer...</span>
+                    </div>
+                    <div>
+                        <button onclick="window.handleReturn(${transaction.borrow_id})" style="background-color: var(--warning-color); width: auto; padding: 8px 12px;">Return Book</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        updateDueTimers();
+        dueTimerInterval = setInterval(updateDueTimers, 1000); 
+        
+    } catch (error) {
+        listElement.innerHTML = `<p style="color: var(--error-color);">Failed to load borrowed books: ${error.message}</p>`;
+    }
+};
+
+
+// Logic for password.html (Changin Password)
+window.handleChangePassword = async (event) => {
+    event.preventDefault();
+    
+    const currentPassword = document.getElementById('current-password')?.value || ''; 
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    
+    displayMessage('message-password', 'Updating password...', '');
+    
+    if (newPassword !== confirmPassword) {
+        return displayMessage('message-password', 'Error: New passwords do not match.', 'error');
+    }
+
+    if (newPassword.length < 6) {
+        return displayMessage('message-password', 'Error: Password must be at least 6 characters.', 'error');
+    }
+    
+    if (!currentPassword && document.getElementById('current-password')) {
+        return displayMessage('message-password', 'Error: Please enter your current password.', 'error');
+    }
+
+    try {
+        await fetchAPI('/api/auth/password', 'PUT', { 
+            currentPassword: currentPassword,
+            newPassword: newPassword 
+        });
+        
+        displayMessage('message-password', 'Password change successful! Please log in again.', 'success');
         setTimeout(window.logout, 2000); 
     } catch (error) {
         displayMessage('message-password', `Update failed: ${error.message}`, 'error');
     }
 };
-
 
 document.addEventListener('DOMContentLoaded', loadUserState);

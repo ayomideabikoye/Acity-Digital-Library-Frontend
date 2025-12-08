@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Books - Digital Library</title>
+    <link rel="stylesheet" href="../styles.css"> 
+</head>
+<body onload="checkAuthAndRedirect(); window.fetchBorrowedBooks();"> 
+    <div class="catalogue-container">
+        
+        <header class="app-header">
+            <h2><span class="icon">📖</span> My Borrowed Books</h2>
+            <div class="header-actions">
+                <button onclick="window.location.href='catalogue.html'" class="btn-secondary">Back to Catalogue</button>
+                <button onclick="window.logout()" class="btn-danger">Logout</button>
+            </div>
+        </header>
+
+        <div id="message-borrowed"></div>
+        
+        <div class="info-banner">
+            <p>Books must be returned within <strong>15 days</strong>. Overdue items are highlighted in red.</p>
+        </div>
+
+        <div id="borrowedList" class="book-grid">
+            <p style="text-align:center; color:#666;">Loading your books...</p>
+        </div>
+    </div>
+
+    <script src="../app.js"></script>
+</body>
+</html>
