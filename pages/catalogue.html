@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogue - Digital Library</title>
+    <link rel="stylesheet" href="../styles.css"> 
+</head>
+<body onload="checkAuthAndRedirect(); window.fetchBooks();"> 
+    <div class="catalogue-container">
+        
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2><span class="icon">📚</span> Book Catalogue</h2>
+            <div>
+                <button onclick="window.location.href='password.html'" style="background-color: #6c757d; width: auto; margin-right: 10px;">Change Password</button>
+                <button onclick="window.logout()" style="background-color: var(--error-color); width: auto;">Logout</button>
+            </div>
+        </header>
+
+        <div id="message-catalogue" style="margin-bottom: 20px;"></div>
+
+        <div id="admin-panel" style="display:none; border: 1px dashed #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+            <h4 style="color: var(--primary-color);">Admin Panel: Add Book</h4>
+            <form id="addBookForm" onsubmit="window.handleAddBook(event)">
+                <input type="text" id="title" name="title" placeholder="Title" required>
+                <input type="text" id="author" name="author" placeholder="Author" required>
+                <input type="number" id="copies" name="copies" placeholder="Total Copies" required style="width: 30%; margin-right: 2%;">
+                <input type="text" id="isbn" name="isbn" placeholder="ISBN" required style="width: 68%;">
+                <button type="submit" style="background-color: var(--success-color);">Add New Book</button>
+            </form>
+            <div id="message-admin"></div>
+        </div>
+        
+        <h3>Available Books:</h3>
+        <div id="bookList"></div>
+    </div>
+
+    <script src="../app.js"></script>
+</body>
+</html>
