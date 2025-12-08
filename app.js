@@ -3,9 +3,9 @@ const BASE_URL = 'https://acity-digital-library-management-api.onrender.com/';
 let currentToken = localStorage.getItem('userToken');
 let currenUserRole = localStorage.getItem('userRole');
 
-function loadUserstate(){
-    currentaToken = localStorage.getItem('userToken');
-    currenUserRole = localStorage.getItem('userRole');
+function loadUserState(){
+    currentToken = localStorage.getItem('userToken');
+    currentUserRole = localStorage.getItem('userRole');
 }
 
 function displayMessage(constainerId, text, type){
@@ -69,7 +69,7 @@ window.handleLogin = async (event) => {
     displayMessage('message-login', 'Logging in...', '');
     
     try {
-        const result = await fetchAPI('/auth/login', 'POST', { username, password });
+        const result = await fetchAPI('/api/auth/login', 'POST', { username, password });
         
         localStorage.setItem('userToken', result.token);
         localStorage.setItem('userRole', result.role);
@@ -89,7 +89,7 @@ window.handleRegister = async (event) => {
     displayMessage('message-register', 'Registering...', '');
     
     try {
-        await fetchAPI('/auth/register', 'POST', { username, password, role: 'student' });
+        await fetchAPI('/api/auth/register', 'POST', { username, password, role: 'student' });
         
         displayMessage('message-register', 'Registration successful! Redirecting to login...', 'success');
         setTimeout(() => window.location.href = 'index.html', 1500);
@@ -105,7 +105,7 @@ window.fetchBooks = async () => {
     listElement.innerHTML = 'Fetching books from API...';
 
     try {
-        const books = await fetchAPI('/books', 'GET');
+        const books = await fetchAPI('/api/books', 'GET');
         
         if (books.length === 0) {
             listElement.innerHTML = '<p>The catalogue is empty.</p>';
@@ -143,7 +143,7 @@ window.handleAddBook = async (event) => {
     displayMessage('message-admin', 'Adding book...', '');
 
     try {
-        await fetchAPI('/books', 'POST', { title, author, total_copies, isbn });
+        await fetchAPI('/api/books', 'POST', { title, author, total_copies, isbn });
         displayMessage('message-admin', `Book added successfully!`, 'success');
         window.fetchBooks(); 
         form.reset();
@@ -156,7 +156,7 @@ window.handleDeleteBook = async (bookId) => {
     if (!confirm("Are you sure you want to delete this book?")) return;
     
     try {
-        await fetchAPI(`/books/${bookId}`, 'DELETE');
+        await fetchAPI(`/api/books/${bookId}`, 'DELETE');
         displayMessage('message-catalogue', `Book ID ${bookId} deleted successfully.`, 'success');
         window.fetchBooks(); 
     } catch (error) {
@@ -166,7 +166,7 @@ window.handleDeleteBook = async (bookId) => {
 
 window.handleBorrow = async (bookId) => {
     try {
-        await fetchAPI('/transactions/borrow', 'POST', { bookId });
+        await fetchAPI('/api/transactions/borrow', 'POST', { bookId });
         displayMessage('message-catalogue', `Book borrowed successfully!`, 'success');
         window.fetchBooks(); 
     } catch (error) {
@@ -186,7 +186,7 @@ window.handleChangePassword = async (event) => {
     }
 
     try {
-        const result = await fetchAPI('/auth/password', 'PUT', { newPassword });
+        const result = await fetchAPI('/api/auth/password', 'PUT', { newPassword });
         
         displayMessage('message-password', 'Password change simulation successful! Please log in again.', 'success');
         setTimeout(window.logout, 2000); 
