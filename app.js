@@ -1,4 +1,4 @@
-const BASE_URL = 'https://acity-digital-library-management-api.onrender.com/';
+const BASE_URL = 'https://acity-digital-library-management-api.onrender.com';
 
 let currentToken = localStorage.getItem('userToken');
 let currenUserRole = localStorage.getItem('userRole');
