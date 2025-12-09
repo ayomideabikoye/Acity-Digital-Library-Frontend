@@ -55,12 +55,10 @@ function checkAuthAndRedirect() {
 }
 
 function resetAddBookForm() {
-    loadUserState();
     const form = document.getElementById('addBookForm');
-    if (form) {
-        form.reset();
-        window.displayMessage('message-admin', '', ''); 
-    }
+    if (!form) return;   
+    form.reset();
+    displayMessage('message-admin', '', '');
 }
 
 async function fetchAPI(endpoint, method, data = null) {
@@ -255,16 +253,22 @@ window.handleAddBook = async (event) => {
 
 window.handleDeleteBook = async (bookId) => {
     if (!confirm('Are you sure you want to delete this book?')) return;
+
     try {
-        await window.fetchAPI(`/api/books/${bookId}`, 'DELETE');
-        
-        window.displayMessage('message-catalogue', `Book (ID: ${bookId}) deleted successfully.`, 'success');
-        
-        window.resetAddBookForm(); 
-        
-        window.fetchBooks(); 
+        const card = document.querySelector(`.book-card[data-book-id="${bookId}"]`);
+        if (card) card.classList.add('fade-out');
+
+        await fetchAPI(`/api/books/${bookId}`, 'DELETE');
+
+        displayMessage('message-catalogue', `Book deleted successfully.`, 'success');
+
+        const form = document.getElementById('addBookForm');
+        if (form) form.reset();
+
+        setTimeout(() => window.fetchBooks(), 400);
+
     } catch (error) {
-        window.displayMessage('message-catalogue', `Failed to delete book: ${error.message}`, 'error');
+        displayMessage('message-catalogue', `Failed to delete: ${error.message}`, 'error');
     }
 };
 
