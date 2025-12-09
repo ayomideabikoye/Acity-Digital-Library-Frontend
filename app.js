@@ -291,31 +291,23 @@ window.handleAddBook = async (event) => {
 };
 
 window.handleDeleteBook = async (bookId) => {
-  if (!confirm("Are you sure you want to delete this book?")) return;
+    if (!confirm('Are you sure you want to delete this book?')) return;
 
-  try {
-    const card = document.querySelector(`.book-card[data-book-id="${bookId}"]`);
-    if (card) card.classList.add("fade-out");
+    try {
+        const card = document.querySelector(`.book-card[data-book-id="${bookId}"]`);
+        if (card) card.classList.add('fade-out');
 
-    await fetchAPI(`/api/books/${bookId}`, "DELETE");
+        await fetchAPI(`/api/books/${bookId}`, 'DELETE');
 
-    displayMessage(
-      "message-catalogue",
-      `Book deleted successfully.`,
-      "success"
-    );
+        displayMessage('message-catalogue', `Book deleted successfully.`, 'success');
 
-    const form = document.getElementById("addBookForm");
-    if (form) form.reset();
+        window.resetAddBookForm(); 
 
-    setTimeout(() => window.fetchBooks(), 400);
-  } catch (error) {
-    displayMessage(
-      "message-catalogue",
-      `Failed to delete: ${error.message}`,
-      "error"
-    );
-  }
+        setTimeout(() => window.fetchBooks(), 400);
+
+    } catch (error) {
+        displayMessage('message-catalogue', `Failed to delete: ${error.message}`, 'error');
+    }
 };
 
 // Logic for borrowing a book (updated message)
@@ -368,58 +360,53 @@ window.handleReturn = async (transactionId) => {
 
 // Logic for fetching user's borrowed books with timer integration
 window.fetchBorrowedBooks = async () => {
-  loadUserState();
-  const listElement = document.getElementById("borrowedList");
-  if (!listElement) return;
-  listElement.innerHTML = "Fetching your borrowed books...";
+    loadUserState();
+    const listElement = document.getElementById('borrowedList');
+    if (!listElement) return;
+    listElement.innerHTML = 'Fetching your borrowed books...';
 
-  if (dueTimerInterval) {
-    clearInterval(dueTimerInterval);
-  }
-
-  try {
-    const transactions = await fetchAPI("/api/transactions/my-books", "GET");
-
-    const currentlyBorrowed = transactions.filter((t) => !t.return_date);
-
-    if (currentlyBorrowed.length === 0) {
-      listElement.innerHTML = "<p>You currently have no borrowed books.</p>";
-      return;
+    if (dueTimerInterval) {
+        clearInterval(dueTimerInterval);
     }
 
-    listElement.innerHTML = currentlyBorrowed
-      .map((transaction) => {
-        const dueDate = new Date(transaction.due_date);
+    try {
+        const transactions = await fetchAPI('/api/transactions/my-books', 'GET');
+        
+        const currentlyBorrowed = transactions.filter(t => !t.return_date);
+        
+        if (currentlyBorrowed.length === 0) {
+            listElement.innerHTML = '<p>You currently have no borrowed books.</p>';
+            return;
+        }
 
-        return `
-            <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong>${transaction.book_title}</strong> by ${
-          transaction.book_author || "Unknown Author"
-        }<br>
-                    Borrowed: ${new Date(
-                      transaction.borrow_date
-                    ).toLocaleDateString()}
+        listElement.innerHTML = currentlyBorrowed.map(transaction => {
+            const dueDate = new Date(transaction.due_date);
+            
+            return `
+                <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${transaction.book_title}</strong> by ${transaction.book_author || 'Unknown Author'}<br>
+                        Borrowed: ${new Date(transaction.borrow_date).toLocaleDateString()}
+                    </div>
+                    <div style="text-align: right;">
+                        Due in:<br>
+                        <span id="timer-${transaction.borrow_id}" data-due-date="${dueDate.toISOString()}">Loading timer...</span>
+                    </div>
+                    <div>
+                        <button onclick="window.handleReturn(${transaction.borrow_id})" style="background-color: var(--warning-color); width: auto; padding: 8px 12px;">Return Book</button>
+                    </div>
                 </div>
-                <div style="text-align: right;">
-                    Due in:<br>
-                    <span id="timer-${
-                      transaction.borrow_id
-                    }" data-due-date="${dueDate.toISOString()}">Loading timer...</span>
-                </div>
-                <div>
-                    <button onclick="window.handleReturn(${
-                      transaction.borrow_id
-                    })" style="background-color: var(--warning-color); width: auto; padding: 8px 12px;">Return Book</button>
-                </div>
-            </div>
-        `;
-      })
-      .join("");
-    // ...
-  } catch (error) {
-    listElement.innerHTML = `<p style="color: var(--error-color);">Failed to load borrowed books: ${error.message}</p>`;
-  }
+            `;
+        }).join('');
+        
+        setTimeout(() => {
+            updateDueTimers();
+            dueTimerInterval = setInterval(updateDueTimers, 1000); 
+        }, 0);
+        
+    } catch (error) {
+        listElement.innerHTML = `<p style="color: var(--error-color);">Failed to load borrowed books: ${error.message}</p>`;
+    }
 };
 
 // logic for Fetching and Rendering Borrowed Books
