@@ -22,6 +22,22 @@ function logout() {
     window.location.href = 'index.html';
 }
 
+function getReturnStatus(dueDate, returnDate) {
+    if (!returnDate) return 'Currently Borrowed';
+
+    const due = new Date(dueDate);
+    const returned = new Date(returnDate);
+
+    due.setHours(0, 0, 0, 0);
+    returned.setHours(0, 0, 0, 0);
+
+    if (returned <= due) {
+        return 'Returned On Time/Early';
+    } else {
+        return 'Returned Late';
+    }
+};
+
 function checkAuthAndRedirect() {
     loadUserState();
     if (!currentToken) {
@@ -35,6 +51,14 @@ function checkAuthAndRedirect() {
         } else {
             adminPanel.style.display = 'none';
         }
+    }
+}
+
+function resetAddBookForm() {
+    const form = document.getElementById('addBookForm');
+    if (form) {
+        form.reset();
+        window.displayMessage('message-admin', '', ''); 
     }
 }
 
@@ -229,14 +253,17 @@ window.handleAddBook = async (event) => {
 };
 
 window.handleDeleteBook = async (bookId) => {
-    if (!confirm("Are you sure you want to delete this book?")) return;
-    
+    if (!confirm('Are you sure you want to delete this book?')) return;
     try {
-        await fetchAPI(`/api/books/${bookId}`, 'DELETE');
-        displayMessage('message-catalogue', `Book ID ${bookId} deleted successfully.`, 'success');
+        await window.fetchAPI(`/api/books/${bookId}`, 'DELETE');
+        
+        window.displayMessage('message-catalogue', `Book (ID: ${bookId}) deleted successfully.`, 'success');
+        
+        window.resetAddBookForm(); 
+        
         window.fetchBooks(); 
     } catch (error) {
-        displayMessage('message-catalogue', `Failed to delete book: ${error.message}`, 'error');
+        window.displayMessage('message-catalogue', `Failed to delete book: ${error.message}`, 'error');
     }
 };
 
@@ -365,22 +392,6 @@ window.fetchMyBooks = async () => {
 
     } catch (error) {
         window.displayMessage('message-mybooks', `Error loading borrowed books: ${error.message}`, 'error');
-    }
-};
-
-function getReturnStatus(dueDate, returnDate) {
-    if (!returnDate) return 'Currently Borrowed';
-
-    const due = new Date(dueDate);
-    const returned = new Date(returnDate);
-
-    due.setHours(0, 0, 0, 0);
-    returned.setHours(0, 0, 0, 0);
-
-    if (returned <= due) {
-        return 'Returned On Time/Early';
-    } else {
-        return 'Returned Late';
     }
 };
 
