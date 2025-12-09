@@ -2,11 +2,15 @@ const BASE_URL = "https://acity-digital-library-management-api.onrender.com";
 
 let currentToken = localStorage.getItem("userToken");
 let currentUserRole = localStorage.getItem("userRole");
+// NEW: Variable for username
+let currentUsername = localStorage.getItem("username"); 
 let dueTimerInterval;
 
 function loadUserState() {
   currentToken = localStorage.getItem("userToken");
   currentUserRole = localStorage.getItem("userRole");
+  // NEW: Load username
+  currentUsername = localStorage.getItem("username");
 }
 
 function displayMessage(constainerId, text, type) {
@@ -19,6 +23,8 @@ function displayMessage(constainerId, text, type) {
 function logout() {
   localStorage.removeItem("userToken");
   localStorage.removeItem("userRole");
+  // NEW: Remove username from storage
+  localStorage.removeItem("username"); 
   window.location.href = "index.html";
 }
 
@@ -38,11 +44,38 @@ function getReturnStatus(dueDate, returnDate) {
   }
 }
 
+// NEW: Function to render the profile widget based on user role and name
+function renderUserProfileWidget() {
+    const container = document.getElementById('profileWidgetContainer');
+    if (!container) return;
+
+    loadUserState(); 
+
+    let userInfoHtml = '';
+    
+    // Only display name if Admin is logged in.
+    if (currentUserRole === 'admin') {
+        const displayName = currentUsername ? currentUsername : 'Admin';
+        userInfoHtml = `<span class="user-info">Welcome, ${displayName} (Admin!)</span>`;
+    } 
+    // If a student, userInfoHtml remains empty, satisfying the constraint.
+
+    container.innerHTML = `
+        <div class="user-profile-widget">
+            ${userInfoHtml}
+            <button onclick="window.logout()" class="btn-danger">Logout</button>
+        </div>
+    `;
+}
+
 function checkAuthAndRedirect() {
   loadUserState();
   if (!currentToken) {
     window.location.href = "index.html";
   }
+
+  // NEW: Render the profile widget right after checkAuthAndRedirect
+  renderUserProfileWidget();
 
   const adminPanel = document.getElementById("admin-panel");
   if (adminPanel) {
@@ -182,6 +215,8 @@ window.handleLogin = async (event) => {
 
     localStorage.setItem("userToken", result.token);
     localStorage.setItem("userRole", result.role);
+    // NEW: Save the username in local storage
+    localStorage.setItem("username", username); 
 
     window.location.href = "catalogue.html";
   } catch (error) {
