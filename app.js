@@ -84,6 +84,35 @@ async function fetchAPI(endpoint, method, data = null) {
     return result;
 }
 
+// function to render a book card
+function renderBookCard(book) {
+    const isAvailable = book.available_copies > 0;
+    const buttonText = isAvailable ? 'Borrow' : 'Out of Stock';
+    const buttonClass = isAvailable ? 'btn-primary' : 'btn-secondary disabled';
+    const buttonDisabled = isAvailable ? '' : 'disabled';
+    
+    const isAdmin = currentUserRole === 'admin';
+    const adminActions = isAdmin ? 
+        `<button onclick="window.handleDelete(${book.book_id})" class="btn-danger">Delete</button>` : '';
+
+    return `
+        <div class="book-card" data-book-id="${book.book_id}">
+            <div>
+                <h4>${book.title}</h4>
+                <p><strong>Author:</strong> ${book.author || 'N/A'}</p>
+                <p><strong>Category:</strong> ${book.category || 'N/A'}</p>
+                <p><strong>ISBN:</strong> ${book.isbn || 'N/A'}</p>
+                <p><strong>Available Copies:</strong> <span class="${isAvailable ? 'available' : 'unavailable'}">${book.available_copies}</span> / ${book.total_copies}</p>
+            </div>
+            <div class="book-actions">
+                ${adminActions}
+                <button onclick="window.handleBorrow(${book.book_id})" class="${buttonClass}" ${buttonDisabled}>
+                    ${buttonText}
+                </button>
+            </div>
+        </div>
+    `;
+}
 // TIMER LOGIC 
 
 function formatTimeRemaining(ms) {
@@ -170,58 +199,26 @@ window.handleRegister = async (event) => {
 
 // Logic for catalogue.html 
 window.fetchBooks = async () => {
-    const selectedCategory = document.getElementById('filter-category')?.value || '';
-    const searchInput = document.getElementById('search-input')?.value || '';
-    
-    let queryParams = '';
-    if (selectedCategory) {
-        queryParams += `category=${encodeURIComponent(selectedCategory)}&`;
-    }
-    if (searchInput) {
-        queryParams += `search=${encodeURIComponent(searchInput)}&`;
-    }
-    
-    if (queryParams) {
-        queryParams = `?${queryParams.slice(0, -1)}`; 
-    }
-
     try {
-        const books = await fetchAPI(`/api/books${queryParams}`, 'GET');
+        const category = document.getElementById('filter-category')?.value || '';
+        const search = document.getElementById('search-input')?.value || '';
+        
+        const books = await fetchAPI(`/api/books?search=${search}&category=${category}`, 'GET', null, true);
+        
         const bookList = document.getElementById('bookList');
-        if (!bookList) return;
-
-        bookList.innerHTML = books.map(book => {
-            const isAvailable = book.available_copies > 0;
-            const cardClass = isAvailable ? 'book-card available' : 'book-card not-available';
-            const buttonText = isAvailable ? 'Borrow' : 'No Copies';
-            const buttonDisabled = !isAvailable ? 'disabled' : '';
-            const adminControls = (currentUserRole === 'admin') ? 
-                `<button onclick="window.handleDeleteBook(${book.book_id})" class="btn-danger btn-small">Delete</button>` : '';
-
-            return `
-                <div class="${cardClass}" id="book-${book.book_id}">
-                    <h4 class="book-title">${book.title}</h4>
-                    <p class="book-author">by ${book.author}</p>
-                    <p class="book-category-tag">Category: ${book.category || 'N/A'}</p>
-                    <p class="book-meta">ISBN: ${book.isbn}</p>
-                    <p class="book-copies">Available: ${book.available_copies} / ${book.total_copies}</p>
-                    <div class="book-actions">
-                        ${adminControls}
-                        <button onclick="window.handleBorrow(${book.book_id})" 
-                                class="btn-primary" ${buttonDisabled}>
-                            ${buttonText}
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
+        bookList.innerHTML = ''; 
 
         if (books.length === 0) {
-            bookList.innerHTML = '<p style="text-align:center; color:#666;">No books found matching your criteria.</p>';
+            bookList.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 50px;">No books found matching your criteria.</p>';
+            return;
         }
 
+        books.forEach(book => {
+            bookList.innerHTML += renderBookCard(book);
+        });
+
     } catch (error) {
-        displayMessage('message-catalogue', `Error loading catalogue: ${error.message}`, 'error');
+        displayMessage('message-catalogue', `Failed to load books: ${error.message}`, 'error');
     }
 };
 
@@ -432,5 +429,6 @@ window.handleChangePassword = async (event) => {
         displayMessage('message-password', `Update failed: ${error.message}`, 'error');
     }
 };
+
 
 document.addEventListener('DOMContentLoaded', loadUserState);
