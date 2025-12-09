@@ -319,6 +319,70 @@ window.fetchBorrowedBooks = async () => {
     }
 };
 
+// logic for Fetching and Rendering Borrowed Books
+window.fetchMyBooks = async () => {
+    try {
+        const transactions = await window.fetchAPI('/api/transactions/my-books', 'GET');
+        const listEl = document.getElementById('myBookList');
+        if (!listEl) return;
+        
+        listEl.innerHTML = '';
+        window.displayMessage('message-mybooks', '', '');
+
+        if (transactions.length === 0) {
+            listEl.innerHTML = '<p style="text-align:center; color:#666; padding: 20px;">You have no borrowed or returned books in your history.</p>';
+            return;
+        }
+
+        listEl.innerHTML = transactions.map(t => {
+            const status = window.getReturnStatus(t.due_date, t.return_date);
+            const isReturned = status !== 'Currently Borrowed';
+            
+            const button = isReturned 
+                ? `<button disabled class="btn-secondary btn-small">Returned</button>` 
+                : `<button onclick="window.handleReturn(${t.borrow_id})" class="btn-success btn-small">Return Now</button>`;
+            
+            let statusClass = 'status-borrowed'; 
+            if (status === 'Returned On Time/Early') statusClass = 'status-early';
+            if (status === 'Returned Late') statusClass = 'status-late';
+
+            const borrowDate = new Date(t.borrow_date).toLocaleDateString();
+            const dueDate = new Date(t.due_date).toLocaleDateString();
+            const returnDateDisplay = t.return_date ? new Date(t.return_date).toLocaleDateString() : '—';
+            
+            return `
+                <div class="transaction-card ${statusClass}">
+                    <h5>${t.book_title}</h5>
+                    <p class="book-author">by ${t.book_author}</p>
+                    <p>Borrowed: ${borrowDate}</p>
+                    <p>Due: ${dueDate}</p>
+                    <p>Returned: ${returnDateDisplay}</p>
+                    <p class="status-indicator">Status: <strong class="${statusClass}">${status}</strong></p>
+                    <div class="actions">${button}</div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        window.displayMessage('message-mybooks', `Error loading borrowed books: ${error.message}`, 'error');
+    }
+};
+
+function getReturnStatus(dueDate, returnDate) {
+    if (!returnDate) return 'Currently Borrowed';
+
+    const due = new Date(dueDate);
+    const returned = new Date(returnDate);
+
+    due.setHours(0, 0, 0, 0);
+    returned.setHours(0, 0, 0, 0);
+
+    if (returned <= due) {
+        return 'Returned On Time/Early';
+    } else {
+        return 'Returned Late';
+    }
+};
 
 // Logic for password.html (Changin Password)
 window.handleChangePassword = async (event) => {
