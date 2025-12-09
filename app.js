@@ -227,28 +227,31 @@ window.fetchBooks = async () => {
 
 window.handleAddBook = async (event) => {
     event.preventDefault();
+
     const title = document.getElementById('title').value;
     const author = document.getElementById('author').value;
     const isbn = document.getElementById('isbn').value;
     const total_copies = parseInt(document.getElementById('copies').value);
     const category = document.getElementById('category').value; 
     
-    if (!category) {
-        return displayMessage('message-admin', 'Error: Please select a category.', 'error');
+    if (!title || !isbn || !total_copies || !category) { 
+        return window.displayMessage('message-admin', 'Missing Title, ISBN, Total Copies, or Category.', 'error'); 
     }
     
-    if (total_copies < 1) {
-        return displayMessage('message-admin', 'Error: Total Copies must be at least 1.', 'error');
-    }
-
-    displayMessage('message-admin', 'Adding book...', '');
     try {
-       const newBook = await fetchAPI('/api/books', 'POST', { title, author, isbn, category, total_copies });
-       displayMessage('message-admin', `Book "${newBook.title}" added successfully!`, 'success');
-       document.getElementById('addBookForm').reset();
-       window.fetchBooks();
+        await window.fetchAPI('/api/books', 'POST', {
+            title, 
+            author, 
+            isbn, 
+            category, 
+            total_copies 
+        });
+        
+        window.displayMessage('message-admin', 'Book added successfully!', 'success');
+        window.resetAddBookForm(); 
+        window.fetchBooks(); 
     } catch (error) {
-        displayMessage('message-admin', `Failed to add book: ${error.message}`, 'error');
+        window.displayMessage('message-admin', `Failed to add book: ${error.message}`, 'error');
     }
 };
 

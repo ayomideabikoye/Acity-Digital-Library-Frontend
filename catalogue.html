@@ -28,9 +28,9 @@
                 <input type="text" id="title" name="title" placeholder="Title" required>
                 <input type="text" id="author" name="author" placeholder="Author" required>
 
-                <div class="form-row">
+                <div class="input-group-row">
                     <select id="category" name="category" required>
-                        <option value="" disabled selected>Select Category</option>
+                        <option value="">Select Category...</option>
                         <option value="Fiction">Fiction</option>
                         <option value="Non-Fiction">Non-Fiction</option>
                         <option value="Science">Science</option>
@@ -39,9 +39,8 @@
                         <option value="Biography">Biography</option>
                         <option value="Education">Education</option>
                     </select>
-                    <input type="number" id="copies" name="copies" placeholder="Copies" required min="1">
+                    <input type="number" id="copies" name="total_copies" placeholder="Total Copies" required min="1">
                 </div>
-
                 <input type="text" id="isbn" name="isbn" placeholder="ISBN" required>
                 <button type="submit" class="btn-primary">Add New Book</button>
             </form>
