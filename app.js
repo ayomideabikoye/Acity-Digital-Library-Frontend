@@ -41,24 +41,23 @@ function getReturnStatus(dueDate, returnDate) {
   }
 }
 
-// Function to render the profile widget based on user role and name
+// Function to render the profile widget to show user names
 function renderUserProfileWidget() {
     const container = document.getElementById('profileWidgetContainer');
     if (!container) return;
 
     loadUserState(); 
 
-    let userInfoHtml = '';
+    const displayName = currentUsername ? currentUsername : 'User'; 
+    let userInfoText = `Welcome, ${displayName}`;
     
-    // Only display name if Admin is logged in.
     if (currentUserRole === 'admin') {
-        const displayName = currentUsername ? currentUsername : 'Admin';
-        userInfoHtml = `<span class="user-info">Welcome, ${displayName} (Admin!)</span>`;
+        userInfoText += ` (Admin!)`;
     } 
 
     container.innerHTML = `
         <div class="user-profile-widget">
-            ${userInfoHtml}
+            <span class="user-info">${userInfoText}</span>
             <button onclick="window.logout()" class="btn-danger">Logout</button>
         </div>
     `;
@@ -210,7 +209,8 @@ window.handleLogin = async (event) => {
 
     localStorage.setItem("userToken", result.token);
     localStorage.setItem("userRole", result.role);
-    localStorage.setItem("username", username); // NEW: Save username
+    // Save the username in local storage
+    localStorage.setItem("username", username); 
 
     window.location.href = "catalogue.html";
   } catch (error) {
