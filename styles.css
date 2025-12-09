@@ -145,7 +145,6 @@ button:active {
 .btn-warning:hover { background-color: #d97706; }
 
 /* Headers & Layouts */
-
 .app-header {
     display: flex;
     justify-content: space-between;
@@ -158,8 +157,8 @@ button:active {
 .header-actions {
     display: flex;
     gap: 10px;
-    align-items: center; /* Vertically align all items */
-    flex-wrap: wrap;
+    align-items: center; 
+    flex-wrap: wrap; 
 }
 
 /* PROFILE WIDGET STYLES */
@@ -170,7 +169,7 @@ button:active {
     padding: 8px 15px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
-    background-color: #fff; /* White background for contrast */
+    background-color: #fff;
     box-shadow: var(--shadow-sm);
 }
 
@@ -185,11 +184,6 @@ button:active {
     padding: 0.4rem 0.8rem;
     width: auto;
     font-size: 0.8rem;
-}
-
-.btn-secondary, .btn-danger {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
 }
 
 /* Admin Panel*/
@@ -314,7 +308,7 @@ button:active {
     padding: 0;
 }
 
-/* 2. Floating Widget Card Style */
+/* Floating Widget Card Style */
 .book-card {
     background: var(--card-bg);
     padding: 20px;
@@ -351,9 +345,9 @@ button:active {
     font-size: 0.95em;
 }
 
-.book-card p:nth-child(3)::before { content: "🏷️ "; opacity: 0.8; } /* Category */
-.book-card p:nth-child(4)::before { content: "🔢 "; opacity: 0.8; } /* ISBN */
-.book-card p:nth-child(5)::before { content: "✅ "; opacity: 0.8; } /* Copies */
+.book-card p:nth-child(3)::before { content: "🏷️ "; opacity: 0.8; } 
+.book-card p:nth-child(4)::before { content: "🔢 "; opacity: 0.8; }
+.book-card p:nth-child(5)::before { content: "✅ "; opacity: 0.8; } 
 
 .book-card .available {
     color: var(--success-color);
@@ -402,11 +396,12 @@ button:active {
         box-shadow: none;
     }
 
+    /* Mobile-specific widget adjustment */
     .user-profile-widget {
         width: 100%;
         justify-content: space-between;
     }
-    
+
     .form-row {
         flex-direction: column;
     }
