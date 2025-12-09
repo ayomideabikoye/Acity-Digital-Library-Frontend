@@ -55,6 +55,7 @@ function checkAuthAndRedirect() {
 }
 
 function resetAddBookForm() {
+    loadUserState();
     const form = document.getElementById('addBookForm');
     if (form) {
         form.reset();
@@ -93,7 +94,7 @@ function renderBookCard(book) {
     
     const isAdmin = currentUserRole === 'admin';
     const adminActions = isAdmin ? 
-        `<button onclick="window.handleDelete(${book.book_id})" class="btn-danger">Delete</button>` : '';
+        `<button onclick="window.handleDeleteBook(${book.book_id})" class="btn-danger">Delete</button>` : '';
 
     return `
         <div class="book-card" data-book-id="${book.book_id}">
@@ -270,7 +271,7 @@ window.handleDeleteBook = async (bookId) => {
 // Logic for borrowing a book (updated message)
 window.handleBorrow = async (bookId) => {
     try {
-        await fetchAPI('/api/transactions/borrow', 'POST', { bookId });
+        await fetchAPI('/api/transactions/borrow', 'POST', { book_id: bookId });
         displayMessage('message-catalogue', `Book borrowed successfully! It is due in 15 days.`, 'success');
         window.fetchBooks(); 
     } catch (error) {
