@@ -145,6 +145,7 @@ button:active {
 .btn-warning:hover { background-color: #d97706; }
 
 /* Headers & Layouts */
+
 .app-header {
     display: flex;
     justify-content: space-between;
@@ -157,6 +158,38 @@ button:active {
 .header-actions {
     display: flex;
     gap: 10px;
+    align-items: center; /* Vertically align all items */
+    flex-wrap: wrap;
+}
+
+/* PROFILE WIDGET STYLES */
+.user-profile-widget {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 8px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #fff; /* White background for contrast */
+    box-shadow: var(--shadow-sm);
+}
+
+.user-info {
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+/* Adjust button sizes within the widget */
+.user-profile-widget .btn-danger {
+    padding: 0.4rem 0.8rem;
+    width: auto;
+    font-size: 0.8rem;
+}
+
+.btn-secondary, .btn-danger {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
 }
 
 /* Admin Panel*/
@@ -348,6 +381,7 @@ button:active {
     opacity: 0;
     transform: scale(0.95);
 }
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .app-header {
@@ -358,6 +392,7 @@ button:active {
     .header-actions {
         flex-direction: column;
         width: 100%;
+        align-items: stretch;
     }
     .catalogue-container {
         width: 100%;
@@ -367,6 +402,11 @@ button:active {
         box-shadow: none;
     }
 
+    .user-profile-widget {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
     .form-row {
         flex-direction: column;
     }
