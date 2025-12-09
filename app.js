@@ -144,61 +144,85 @@ window.handleRegister = async (event) => {
     }
 };
 
-// Logic for catalogue.html (Book Management & Display)
+// Logic for catalogue.html 
 window.fetchBooks = async () => {
-    loadUserState(); 
-    if (dueTimerInterval) {
-        clearInterval(dueTimerInterval);
-        dueTimerInterval = null;
+    const selectedCategory = document.getElementById('filter-category')?.value || '';
+    const searchInput = document.getElementById('search-input')?.value || '';
+    
+    let queryParams = '';
+    if (selectedCategory) {
+        queryParams += `category=${encodeURIComponent(selectedCategory)}&`;
+    }
+    if (searchInput) {
+        queryParams += `search=${encodeURIComponent(searchInput)}&`;
     }
     
-    const listElement = document.getElementById('bookList');
-    if (!listElement) return;
-    listElement.innerHTML = 'Fetching books from API...';
+    if (queryParams) {
+        queryParams = `?${queryParams.slice(0, -1)}`; 
+    }
 
     try {
-        const books = await fetchAPI('/api/books', 'GET');
-        
+        const books = await fetchAPI(`/api/books${queryParams}`, 'GET');
+        const bookList = document.getElementById('bookList');
+        if (!bookList) return;
+
+        bookList.innerHTML = books.map(book => {
+            const isAvailable = book.available_copies > 0;
+            const cardClass = isAvailable ? 'book-card available' : 'book-card not-available';
+            const buttonText = isAvailable ? 'Borrow' : 'No Copies';
+            const buttonDisabled = !isAvailable ? 'disabled' : '';
+            const adminControls = (currentUserRole === 'admin') ? 
+                `<button onclick="window.handleDeleteBook(${book.book_id})" class="btn-danger btn-small">Delete</button>` : '';
+
+            return `
+                <div class="${cardClass}" id="book-${book.book_id}">
+                    <h4 class="book-title">${book.title}</h4>
+                    <p class="book-author">by ${book.author}</p>
+                    <p class="book-category-tag">Category: ${book.category || 'N/A'}</p>
+                    <p class="book-meta">ISBN: ${book.isbn}</p>
+                    <p class="book-copies">Available: ${book.available_copies} / ${book.total_copies}</p>
+                    <div class="book-actions">
+                        ${adminControls}
+                        <button onclick="window.handleBorrow(${book.book_id})" 
+                                class="btn-primary" ${buttonDisabled}>
+                            ${buttonText}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
         if (books.length === 0) {
-            listElement.innerHTML = '<p>The catalogue is empty.</p>';
-            return;
+            bookList.innerHTML = '<p style="text-align:center; color:#666;">No books found matching your criteria.</p>';
         }
 
-        listElement.innerHTML = books.map(book => `
-            <div style="border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong>${book.title}</strong> by ${book.author} (ISBN: ${book.isbn})<br>
-                    Available: <span style="color: ${book.available_copies > 0 ? 'var(--success-color)' : 'var(--error-color)'};">${book.available_copies} / ${book.total_copies}</span>
-                </div>
-                <div>
-                    ${currentUserRole !== 'admin' && book.available_copies > 0 ? 
-                        `<button onclick="window.handleBorrow(${book.book_id})" style="background-color: #007bff; width: auto; padding: 8px 12px; margin-right: 10px;">Borrow</button>` : ''}
-                    ${currentUserRole === 'admin' ? 
-                        `<button onclick="window.handleDeleteBook(${book.book_id})" style="background-color: var(--error-color); width: auto; padding: 8px 12px;">Delete</button>` : ''}
-                </div>
-            </div>
-        `).join('');
-        
     } catch (error) {
-        listElement.innerHTML = `<p style="color: var(--error-color);">Failed to load catalogue. Check server connection: ${error.message}</p>`;
+        displayMessage('message-catalogue', `Error loading catalogue: ${error.message}`, 'error');
     }
 };
 
 window.handleAddBook = async (event) => {
     event.preventDefault();
-    const form = event.target;
-    const title = form.title.value;
-    const author = form.author.value;
-    const total_copies = parseInt(form.copies.value);
-    const isbn = form.isbn.value;
+    const title = document.getElementById('title').value;
+    const author = document.getElementById('author').value;
+    const isbn = document.getElementById('isbn').value;
+    const total_copies = parseInt(document.getElementById('copies').value);
+    const category = document.getElementById('category').value; 
     
-    displayMessage('message-admin', 'Adding book...', '');
+    if (!category) {
+        return displayMessage('message-admin', 'Error: Please select a category.', 'error');
+    }
+    
+    if (total_copies < 1) {
+        return displayMessage('message-admin', 'Error: Total Copies must be at least 1.', 'error');
+    }
 
+    displayMessage('message-admin', 'Adding book...', '');
     try {
-        await fetchAPI('/api/books', 'POST', { title, author, total_copies, isbn });
-        displayMessage('message-admin', `Book added successfully!`, 'success');
-        window.fetchBooks(); 
-        form.reset();
+       const newBook = await fetchAPI('/api/books', 'POST', { title, author, isbn, category, total_copies });
+       displayMessage('message-admin', `Book "${newBook.title}" added successfully!`, 'success');
+       document.getElementById('addBookForm').reset();
+       window.fetchBooks();
     } catch (error) {
         displayMessage('message-admin', `Failed to add book: ${error.message}`, 'error');
     }

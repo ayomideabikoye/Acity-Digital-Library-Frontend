@@ -232,6 +232,47 @@ button:active {
     color: #991b1b;
 }
 
+.book-filter-section {
+    margin-bottom: 20px;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.filter-controls label {
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.filter-controls select, .filter-controls input[type="text"] {
+    flex-grow: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #f9fafb;
+    box-shadow: var(--shadow-sm);
+    font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-controls label {
+        align-self: flex-start;
+        margin-top: 10px;
+    }
+    .filter-controls select, .filter-controls input[type="text"] {
+        width: 100%;
+    }
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .app-header {

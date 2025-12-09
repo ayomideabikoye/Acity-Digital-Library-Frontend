@@ -25,16 +25,44 @@
             <form id="addBookForm" onsubmit="window.handleAddBook(event)" class="admin-form">
                 <input type="text" id="title" name="title" placeholder="Title" required>
                 <input type="text" id="author" name="author" placeholder="Author" required>
+                
                 <div class="form-row">
-                    <input type="number" id="copies" name="copies" placeholder="Copies" required>
-                    <input type="text" id="isbn" name="isbn" placeholder="ISBN" required>
+                    <select id="category" name="category" required>
+                        <option value="" disabled selected>Select Category</option>
+                        <option value="Fiction">Fiction</option>
+                        <option value="Non-Fiction">Non-Fiction</option>
+                        <option value="Science">Science</option>
+                        <option value="Technology">Technology</option>
+                        <option value="History">History</option>
+                        <option value="Biography">Biography</option>
+                        <option value="Education">Education</option>
+                    </select>
+                    <input type="number" id="copies" name="copies" placeholder="Copies" required min="1">
                 </div>
+                
+                <input type="text" id="isbn" name="isbn" placeholder="ISBN" required>
                 <button type="submit" class="btn-primary">Add New Book</button>
             </form>
             <div id="message-admin"></div>
         </div>
         
-        <h3 class="section-title">Available Books</h3>
+        <div class="book-filter-section">
+            <h3 class="section-title">Available Books</h3>
+            <div class="filter-controls">
+                <label for="filter-category">Filter by Category:</label>
+                <select id="filter-category" onchange="window.fetchBooks()">
+                    <option value="">All Categories</option>
+                    <option value="Fiction">Fiction</option>
+                    <option value="Non-Fiction">Non-Fiction</option>
+                    <option value="Science">Science</option>
+                    <option value="Technology">Technology</option>
+                    <option value="History">History</option>
+                    <option value="Biography">Biography</option>
+                    <option value="Education">Education</option>
+                </select>
+                <input type="text" id="search-input" placeholder="Search by Title or Author..." onkeyup="window.fetchBooks()">
+            </div>
+        </div>
         <div id="bookList" class="book-grid"></div>
     </div>
 
