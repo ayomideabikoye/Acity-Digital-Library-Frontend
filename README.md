@@ -1,92 +1,102 @@
-## 💻 Digital Library Frontend
-
-This project is a clean, responsive web interface for interacting with the **Digital Library API**.  
-It is built using **native HTML, CSS, and vanilla JavaScript** to ensure maximum performance, simplicity, and accessibility.
 
 ---
 
-## 🎨 Design and Structure
+# 🎨 FRONTEND README.md (COPY EVERYTHING BELOW)
 
-| File Name | Description | Key Components |
-|---------|------------|----------------|
-| `index.html` | Login Page | User login form |
-| `register.html` | Registration Page | New student/admin registration form |
-| `catalogue.html` | Main Catalogue | Displays available books, search/filter controls, and the Admin Panel for book management |
-| `userBooks.html` | My Borrowed Books | Shows the user’s borrowing history, due dates, and return actions |
-| `password.html` | Change Password | Form for authenticated users to update their password |
-| `styles.css` | Styling | Responsive, modern card-based layout |
-| `app.js` | Core Logic | Handles API communication, DOM manipulation, authentication state, and UI logic |
 
----
+# 💻 Digital Library Catalogue System – Frontend
 
-## 💡 Core Frontend Functionality (`app.js`)
+![HTML](https://img.shields.io/badge/HTML-Frontend-orange)
+![CSS](https://img.shields.io/badge/CSS-Styling-blue)
+![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-yellow)
+![Deployment](https://img.shields.io/badge/Hosted_on-GitHub_Pages-success)
+![Course](https://img.shields.io/badge/Course-CS3139_Web_Technologies-purple)
 
-The `app.js` file manages the entire client-side logic and communicates with the backend API.
+This repository contains the frontend interface for the Digital Library Catalogue System.  
+It allows students and administrators to interact with the backend API through a clean and responsive user interface.
 
 ---
 
-### 1️⃣ Authentication & State Management
+## 🧾 Project Overview
 
-- **State Loading**
-  - Loads `userToken`, `userRole`, and `username` from `localStorage` on initialization.
-- **Token Management**
-  - All authenticated requests use the `fetchAPI` helper, which automatically attaches:
-    ```
-    Authorization: Bearer <token>
-    ```
-- **Route Protection**
-  - `checkAuthAndRedirect()` ensures users are on the correct page:
-    - Redirects authenticated users away from `index.html`
-    - Redirects unauthenticated users away from protected pages like `catalogue.html`
-- **Logout**
-  - `logout()` clears `localStorage` and redirects the user to the login page.
+The frontend is built using **HTML, CSS, and Vanilla JavaScript** and communicates with the backend using the Fetch API.
+
+### Core Capabilities
+- User login and registration
+- Book catalogue browsing
+- Search and filter functionality
+- Borrow and return management
+- Role-based UI rendering
 
 ---
 
-### 2️⃣ Catalogue & Book Display
+## 🌐 Deployment Link
 
-- **fetchBooks()**
-  - Retrieves books from `/api/books`
-  - Applies:
-    - Search terms (`search-input`)
-    - Category filters (`filter-category`)
-- **renderBooks()**
-  - Dynamically generates book cards (`book-card`) in `catalogue.html`
-  - Shows or hides the **Admin Panel** based on `currentUserRole`
-- **User Actions**
-  - `handleBorrow` → `POST /api/transactions/borrow`
-  - `handleDeleteBook` → `DELETE /api/books/:bookId`
+- **Frontend (GitHub Pages):**  
+  👉 `https://ayomideabikoye.github.io/Acity-Digital-Library-Frontend/`
 
 ---
 
-### 3️⃣ Transaction History
+## 🔐 Login Details (For Grading)
 
-- **fetchBorrowedBooks()**
-  - Fetches the user’s borrowing history from `/api/transactions/my-books`
-- **renderBorrowedBooks()**
-  - Displays borrowed books on `userBooks.html`
-- **Overdue Status**
-  - Renders due dates
-  - Highlights overdue books for immediate visual feedback
-- **Return Action**
-  - `handleReturn` → `PUT /api/transactions/return/:borrowId`
+### Admin Account
+Name: Ayomide Abikoye
+Password: a123456$#
+
+
+### Student Account
+- Students can register using the registration page.
 
 ---
 
-### 4️⃣ UI / UX Features
+## ✅ Feature Checklist (Frontend)
 
-- **CORS Configuration**
-  - `BASE_URL` is set to the deployed backend URL to support cross-origin requests.
-- **User Feedback**
-  - `displayMessage()` provides clear, color-coded success and error messages.
-- **Role-Based UI**
-  - The **Admin Panel** in `catalogue.html` is conditionally rendered based on `currentUserRole`, ensuring admin-only features are not visible to regular users.
+### 🔑 Authentication
+- ✅ Login and registration forms
+- ✅ JWT stored in localStorage
+- ✅ Protected page redirection
+
+### 📖 Book Catalogue
+- ✅ Display all books
+- ✅ Search by title or author
+- ✅ Filter by category
+- ✅ Availability status display
+
+### 🔄 Borrow & Return
+- ✅ Borrow available books
+- ✅ View borrowing history
+- ✅ Due date tracking
+- ✅ Overdue book highlighting
+- ✅ Return borrowed books
+
+### 🎨 UI / UX
+- ✅ Responsive layout
+- ✅ Role-based admin panel
+- ✅ Clear success and error messages
 
 ---
 
-## ✅ Technology Stack
+## 🧩 Frontend Structure
 
-- **HTML5**
-- **CSS3**
-- **Vanilla JavaScript (ES6+)**
-- **RESTful API Integration**
+| File | Purpose |
+|----|--------|
+| `index.html` | Login page |
+| `register.html` | Registration page |
+| `catalogue.html` | Book catalogue & admin panel |
+| `userBooks.html` | Borrowed books |
+| `password.html` | Change password |
+| `styles.css` | Styling |
+| `app.js` | API logic and UI control |
+
+---
+
+## ⚙️ Frontend Logic (`app.js`)
+
+- Manages authentication state using localStorage
+- Attaches JWT to API requests
+- Fetches and renders books dynamically
+- Controls admin-only UI elements
+- Handles borrowing and returning of books
+
+---
+
